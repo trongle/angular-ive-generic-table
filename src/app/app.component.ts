@@ -1,76 +1,38 @@
-import { Component, VERSION, OnInit } from "@angular/core";
+import { Component, VERSION, OnInit, ViewChild } from "@angular/core";
+import {Column} from "./generic-table/column.model";
+import { ShiftProgressComponent } from "./generic-table/cells/shift-progress.component";
+import { CheckboxComponent } from "./generic-table/cells/checkbox.component";
+import { GenericTableComponent } from "./generic-table/generic-table.component";
+import { ShiftTransformer } from "./transformers/shift.transformer";
+import { Shift } from "./models/shift.model";
+import { Button } from "./generic-table/button.model";
 
 @Component({
   selector: "my-app",
   templateUrl: "./app.component.html",
   styleUrls: ["./app.component.css"]
 })
-export class AppComponent implements OnInit {
-  data = [
-    { id: 1, name: "Trọng", status: "active" },
-    { id: 2, name: "Trọng Lê", status: "inActive" }
+export class AppComponent {
+  @ViewChild('genericTable') table: GenericTableComponent<Shift>;
+  shiftTransformer = new ShiftTransformer;
+
+  columnsToDisplay = [
+    new Column("ID","shiftId"),
+    new Column("Name", "shiftName"),
+    new Column("Progress", "shiftProgress", ShiftProgressComponent)
   ];
-  table: Table = new Table([
-    new Column("id"),
-    new Column("name"),
-    new Column("status")
-  ]);
 
-  ngOnInit() {
+  buttonActions = [
+    new Button("Add", null, this.onAddClick),
+    new Button("Edit", null, this.onEditClick)
+  ];
+
+  onEditClick(event, shift: Shift, index: number) {
+    console.log(event, shift);
   }
 
-  get columnsToDisplay() {
-    return this.table.columnNames;
-  }
-}
-
-interface TableColumnInterface {
-  name: string;
-  type: string;
-}
-
-class Column implements TableColumnInterface {
-  name = "";
-  type: string;
-
-  constructor(name, type = "text") {
-    this.name = name;
-    this.type = type;
+  onAddClick(event, shift: Shift, index: number) {
+    console.log(event, shift);
   }
 }
 
-class Table {
-  columns: Column[] = [];
-
-  constructor(columns: Column[] = []) {
-    this.columns = columns;
-  }
-
-  get columnNames(): string[] {
-    return this.columns.map(c => c.name);
-  }
-
-  addColumns(columns: Column[] | Column) {
-    const existstingColumns = this.columnNames.map(name => name.toLowerCase());
-
-    if (Array.isArray(columns)) {
-      columns
-        .filter(c => !existstingColumns.includes(c.name.toLowerCase()))
-        .forEach((c, i) => this.columns.push(c));
-    } else {
-      if (!existstingColumns.includes(columns.name.toLowerCase())) {
-        this.columns.push(columns);
-      }
-    }
-  }
-
-  removeColumns(columns: Column[] | Column) {
-    const removingColumnNames = Array.isArray(columns)
-      ? columns.map(c => c.name.toLowerCase())
-      : [columns.name.toLowerCase()];
-
-    this.columns
-      .filter(c => removingColumnNames.includes(c.name.toLowerCase()))
-      .forEach((c, i) => this.columns.splice(0, 1));
-  }
-}
